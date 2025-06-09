@@ -210,11 +210,11 @@ float* blobFromImage(Mat& img){
     int img_w = img.cols;
     vector<float> mean = {0.485, 0.456, 0.406};
     vector<float> std = {0.229, 0.224, 0.225};
-    for (size_t c = 0; c < channels; c++) 
+    for (int c = 0; c < channels; c++) 
     {
-        for (size_t  h = 0; h < img_h; h++) 
+        for (int h = 0; h < img_h; h++) 
         {
-            for (size_t w = 0; w < img_w; w++) 
+            for (int w = 0; w < img_w; w++) 
             {
                 blob[c * img_w * img_h + h * img_w + w] =
                     (((float)img.at<Vec3b>(h, w)[c]) / 255.0f - mean[c]) / std[c];
@@ -366,7 +366,6 @@ void doInference(IExecutionContext& context, float* input, float* output, const 
     assert(engine.getBindingDataType(inputIndex) == nvinfer1::DataType::kFLOAT);
     const int outputIndex = engine.getBindingIndex(OUTPUT_BLOB_NAME);
     assert(engine.getBindingDataType(outputIndex) == nvinfer1::DataType::kFLOAT);
-    int mBatchSize = engine.getMaxBatchSize();
 
     // Create GPU buffers on device
     CHECK(cudaMalloc(&buffers[inputIndex], 3 * input_shape.height * input_shape.width * sizeof(float)));
@@ -435,13 +434,13 @@ int main(int argc, char** argv) {
 	if (!cap.isOpened())
 		return 0;
 
-	int img_w = cap.get(CAP_PROP_FRAME_WIDTH);
-	int img_h = cap.get(CAP_PROP_FRAME_HEIGHT);
-    int fps = cap.get(CAP_PROP_FPS);
-    long nFrame = static_cast<long>(cap.get(CAP_PROP_FRAME_COUNT));
+	int img_w = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+	int img_h = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+    int fps = cap.get(cv::CAP_PROP_FPS);
+    long nFrame = static_cast<long>(cap.get(cv::CAP_PROP_FRAME_COUNT));
     cout << "Total frames: " << nFrame << endl;
 
-    VideoWriter writer("demo.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
+    VideoWriter writer("demo.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, Size(img_w, img_h));
 
     Mat img;
     BYTETracker tracker(fps, 30);

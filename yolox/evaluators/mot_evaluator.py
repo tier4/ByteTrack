@@ -151,7 +151,10 @@ class MOTEvaluator:
                     self.args.track_thresh = 0.7
                 elif video_name == 'MOT17-14-FRCNN':
                     self.args.track_thresh = 0.67
-                elif video_name in ['MOT20-06', 'MOT20-08']:
+                else:
+                    self.args.track_thresh = ori_thresh
+                
+                if video_name == 'MOT20-06' or video_name == 'MOT20-08':
                     self.args.track_thresh = 0.3
                 else:
                     self.args.track_thresh = ori_thresh
@@ -186,21 +189,20 @@ class MOTEvaluator:
             data_list.extend(output_results)
 
             # run tracking
-            if outputs[0] is not None:
-                online_targets = tracker.update(outputs[0], info_imgs, self.img_size)
-                online_tlwhs = []
-                online_ids = []
-                online_scores = []
-                for t in online_targets:
-                    tlwh = t.tlwh
-                    tid = t.track_id
-                    vertical = tlwh[2] / tlwh[3] > 1.6
-                    if tlwh[2] * tlwh[3] > self.args.min_box_area and not vertical:
-                        online_tlwhs.append(tlwh)
-                        online_ids.append(tid)
-                        online_scores.append(t.score)
-                # save results
-                results.append((frame_id, online_tlwhs, online_ids, online_scores))
+            online_targets = tracker.update(outputs[0], info_imgs, self.img_size)
+            online_tlwhs = []
+            online_ids = []
+            online_scores = []
+            for t in online_targets:
+                tlwh = t.tlwh
+                tid = t.track_id
+                vertical = tlwh[2] / tlwh[3] > 1.6
+                if tlwh[2] * tlwh[3] > self.args.min_box_area and not vertical:
+                    online_tlwhs.append(tlwh)
+                    online_ids.append(tid)
+                    online_scores.append(t.score)
+            # save results
+            results.append((frame_id, online_tlwhs, online_ids, online_scores))
 
             if is_time_record:
                 track_end = time_synchronized()
